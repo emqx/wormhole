@@ -11,13 +11,13 @@ type CmdType int
 const (
 	ILLEGAL CmdType = iota
 	REGISTER
-	CONTROL
+	HTTP
 )
 
 var commands = []string{
 	ILLEGAL:  "Illegal",
 	REGISTER: "Register",
-	CONTROL:  "Control",
+	HTTP:     "Http",
 }
 
 func (cmd CmdType) String() string {
@@ -31,13 +31,13 @@ type ResponseCode int
 const (
 	OK ResponseCode = iota
 	BAD_REQUEST
-	INTERNAL_ERROR
+	ERROR_FOUND
 )
 
 var responseDesc = []string{
-	OK:             "OK",
-	BAD_REQUEST:    "Bad request content",
-	INTERNAL_ERROR: "Internal error when processing request",
+	OK:          "OK",
+	BAD_REQUEST: "Bad request content",
+	ERROR_FOUND: "Internal error when processing request",
 }
 
 //const IDENTIFIER string = "identifier"
@@ -61,9 +61,9 @@ func (c *Command) Json() []byte {
 }
 
 type Response struct {
-	Identifier  string
-	Code        ResponseCode
-	Description string
+	Identifier string
+	Code       ResponseCode
+	Contents   interface{}
 }
 
 func (r *Response) Json() []byte {

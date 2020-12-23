@@ -1,11 +1,13 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	quic "github.com/lucas-clemente/quic-go"
+	"net/http"
 	"os"
 	"os/signal"
 	"quicdemo/common"
@@ -20,16 +22,45 @@ type QCClient struct {
 	ListenMgr  common.Subject
 }
 
+func (qcc *QCClient)sendRequest(r common.HttpRequest) (*http.Response, error){
+	req, _ := http.NewRequest(r.Method, r.ToURL(), bytes.NewBuffer(r.Body))
+	req.Header = r.Headers
+	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+	client := &http.Client{}
+	return client.Do(req)
+}
+
 func (qcc *QCClient)OnEvent(t common.EventType, payload []byte) error {
 	if t == common.RESPONSE {
 		common.Log.Printf("Get response from rest %s.", string(payload))
 	} else if t == common.COMMAND {
-		common.Log.Printf("Get command from rest %s.", string(payload))
-		return qcc.WriteTo(common.Response{
-			Identifier:  qcc.Identifier,
-			Code:        common.OK,
-			Description: "Successful",
-		})
+		cmd := &common.Command{}
+		err := json.Unmarshal(payload, &cmd);
+		if err != nil {
+			return err
+		}
+		//common.Log.Printf("Get command from rest %s.", string(payload))
+		if cmd.CType == common.HTTP {
+			if http, ok := cmd.Payload.(common.HttpRequest); ok {
+				if response, err1 := qcc.sendRequest(http); err1 != nil {
+					return qcc.WriteTo(common.Response{
+						Identifier: qcc.Identifier,
+						Code:       common.ERROR_FOUND,
+						Contents:   err1.Error(),
+					})
+				} else {
+					return qcc.WriteTo(common.Response{
+						Identifier: qcc.Identifier,
+						Code:       common.OK,
+						Contents:   response,
+					})
+				}
+				//fmt.Printf("%s", http.Method)
+			} else {
+				return fmt.Errorf("Not valid http request!")
+			}
+		}
+
 	} else {
 		return fmt.Errorf("Found error %s", string(payload))
 	}
@@ -39,11 +70,18 @@ func (qcc *QCClient)OnEvent(t common.EventType, payload []byte) error {
 // We start a rest echoing data on the first stream the internal opens,
 // then connect with a internal, send the message, and wait for its receipt.
 func main() {
+	args := os.Args[1:]
+	if len(args) == 0 {
+		fmt.Printf("The node identifier is expected.")
+		os.Exit(0)
+	}
+
 	conf := common.GetConf()
 	conf.InitLog()
 
 	mgr := common.ListenerMgr{}
-	qcc := QCClient{"127.0.0.1:4242", "test", nil, &mgr}
+	common.Log.Printf("The node identifier is %s\n", args[0])
+	qcc := QCClient{"127.0.0.1:4242", args[0], nil, &mgr}
 	mgr.Add(&qcc)
 
 	err := qcc.clientMain()

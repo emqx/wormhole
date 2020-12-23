@@ -20,6 +20,8 @@ type WormholeServer struct {
 	ListenMgr  common.Subject
 }
 
+
+
 func (ws *WormholeServer) OnEvent(t common.EventType, payload []byte) error {
 	if t == common.RESPONSE {
 		common.Log.Printf("Get response from rest %s.", string(payload))
@@ -32,9 +34,9 @@ func (ws *WormholeServer) OnEvent(t common.EventType, payload []byte) error {
 		}
 		common.Log.Printf("Get command from rest %s.", string(payload))
 		return ws.IssueResponse(common.Response{
-			Identifier:  cmd.Identifier,
-			Code:        common.OK,
-			Description: "Successful",
+			Identifier: cmd.Identifier,
+			Code:       common.OK,
+			Contents:   "Successful",
 		})
 	} else {
 		return fmt.Errorf("Found error %s", string(payload))
@@ -94,7 +96,7 @@ func (ws *WormholeServer) ListenToClient(conn *common.QuicConnection) {
 							resp := common.Response{
 								Identifier:  cmd.Identifier,
 								Code:        common.OK,
-								Description: "The client is registered successfully.",
+								Contents: "The client is registered successfully.",
 							}
 							common.GetManager().AddConn(cmd.Identifier, conn)
 							if e = ws.IssueResponse(resp); e != nil {
@@ -105,7 +107,7 @@ func (ws *WormholeServer) ListenToClient(conn *common.QuicConnection) {
 							common.Log.Errorf("%s", estr)
 							resp := common.Response{
 								Code:        common.BAD_REQUEST,
-								Description: estr,
+								Contents: estr,
 							}
 							if e = ws.IssueResponse(resp); e != nil {
 								common.Log.Errorf("Error: %v", e)

@@ -3,6 +3,7 @@ package rest
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"io/ioutil"
 	"net/http"
@@ -112,7 +113,7 @@ func processRequest(w http.ResponseWriter, req *http.Request) {
 
 	conn := common.GetManager().GetConn(id)
 	if conn == nil {
-		handleError(w, fmt.Errorf("The connection to node %s is lost.", id), "")
+		handleError(w, fmt.Errorf("The connection to node %s is not existed.", id), "")
 		return
 	}
 
@@ -120,8 +121,9 @@ func processRequest(w http.ResponseWriter, req *http.Request) {
 
 	cmd := common.Command{
 		Identifier: id,
-		CType:      common.CONTROL,
+		CType:      common.HTTP,
 		Payload: common.HttpRequest{
+			Method:   req.Method,
 			Host:     "",
 			Port:     ware.Port,
 			BasePath: ware.Path,
@@ -205,12 +207,12 @@ func CreateRestServer(port int) *http.Server {
 	r := mux.NewRouter()
 
 	r.HandleFunc("/nodes/register", register).Methods(http.MethodPost)
-	r.HandleFunc("/nodes/{id}/", delete).Methods(http.MethodDelete)
+	r.HandleFunc("/nodes/{id}", delete).Methods(http.MethodDelete)
 	r.HandleFunc("/nodes/", update).Methods(http.MethodPut)
 	r.HandleFunc("/nodes/", list).Methods(http.MethodGet)
 
 	r.HandleFunc("/nodes/{id}/mware", mlist).Methods(http.MethodGet)
-	r.HandleFunc("/nodes/{id}/mware/{name}", mregister).Methods(http.MethodPost)
+	r.HandleFunc("/nodes/{id}/mware", mregister).Methods(http.MethodPost)
 	r.HandleFunc("/nodes/{id}/mware", mupdate).Methods(http.MethodPut)
 	r.HandleFunc("/nodes/{id}/mware/{name}", mdelete).Methods(http.MethodDelete)
 
@@ -222,7 +224,7 @@ func CreateRestServer(port int) *http.Server {
 		WriteTimeout: time.Second * 60 * 5,
 		ReadTimeout:  time.Second * 60 * 5,
 		IdleTimeout:  time.Second * 60,
-		//Handler:      handlers.CORS(handlers.AllowedHeaders([]string{"Accept", "Accept-Language", "Content-Type", "Content-Language", "Origin"}))(r),
+		Handler:      handlers.CORS(handlers.AllowedHeaders([]string{"Accept", "Accept-Language", "Content-Type", "Content-Language", "Origin"}))(r),
 	}
 	server.SetKeepAlivesEnabled(false)
 	return server

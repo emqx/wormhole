@@ -110,7 +110,7 @@ func (this *config) InitLog() bool {
 		return true
 	} else {
 		Log.Infof("Failed to log to file, using default stderr.")
-		return false
+		return true
 	}
 }
 
