@@ -106,7 +106,9 @@ type BasicResponse struct {
 type HttpResponse struct {
 	BasicResponse
 	http.Header
-	Body []byte
+	HttpResponseCode int
+	HttpResponseText string
+	Body             []byte
 }
 
 func (r *BasicResponse)GetSequence() int {

@@ -1,6 +1,8 @@
 package main
 
 import (
+	"bytes"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -93,4 +95,17 @@ func main() {
 	respJ, _ := json.Marshal(resp)
 	fmt.Println("---")
 	fmt.Println(respJ)
+
+	if req, error := http.NewRequest("DELETE", "http://localhost:9081/streams", bytes.NewBuffer([]byte(""))); error != nil {
+		fmt.Printf("%v", error)
+	} else {
+
+		http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+		client := &http.Client{}
+		if resp, error := client.Do(req); error != nil {
+			fmt.Printf("%v", error)
+		} else {
+			fmt.Printf("%v", resp)
+		}
+	}
 }

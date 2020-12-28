@@ -24,14 +24,57 @@ func getstream(w http.ResponseWriter, req *http.Request) {
 	jsonResponse(res, w)
 }
 
+//{"sql":"create stream my_stream (id bigint, name string, score float) WITH ( datasource = \"topic/temperature\", FORMAT = \"json\", KEY = \"id\")"}
+
+type stream struct {
+	Sql    string `json:"sql"`
+}
+
+func poststream(w http.ResponseWriter, req *http.Request) {
+	defer req.Body.Close()
+	stream := &stream{}
+	err := json.NewDecoder(req.Body).Decode(&stream)
+	if err != nil {
+		fmt.Printf("%s\n", err)
+	}
+
+
+	result := map[string]interface{}{
+		"result": "success",
+		"rule":   stream,
+	}
+	jsonResponse(result, w)
+}
+
+func updatestream(w http.ResponseWriter, req *http.Request) {
+	defer req.Body.Close()
+	stream := &stream{}
+	err := json.NewDecoder(req.Body).Decode(&stream)
+	if err != nil {
+		fmt.Printf("%s\n", err)
+	}
+
+	result := map[string]interface{}{
+		"result": "failed",
+		"rule":   stream,
+	}
+	jsonResponse(result, w)
+}
+
+func deletestream(w http.ResponseWriter, req *http.Request) {
+	result := map[string]interface{}{
+		"result": "OK",
+	}
+	jsonResponse(result, w)
+}
+
 func createRestServer(port int) *http.Server {
 	r := mux.NewRouter()
 
 	r.HandleFunc("/streams", getstream).Methods(http.MethodGet)
-	//r.HandleFunc("/nodes/{id}", delete).Methods(http.MethodDelete)
-	//r.HandleFunc("/nodes/", update).Methods(http.MethodPut)
-	//r.HandleFunc("/nodes/", list).Methods(http.MethodGet)
-
+	r.HandleFunc("/streams", poststream).Methods(http.MethodPost)
+	r.HandleFunc("/streams", updatestream).Methods(http.MethodPut)
+	r.HandleFunc("/streams", deletestream).Methods(http.MethodDelete)
 
 	server := &http.Server{
 		Addr: fmt.Sprintf("0.0.0.0:%d", port),

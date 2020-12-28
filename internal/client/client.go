@@ -110,6 +110,7 @@ func (qcc *QCClient) onCommand(cmd *common.HttpCommand) error {
 			Description:  err1.Error(),
 		})
 	} else {
+		common.Log.Infof("headers from remote server %v", response.Header)
 		if c, e := getContent(*response); e != nil {
 			return qcc.WriteTo(common.BasicResponse{
 				Identifier:   qcc.Identifier,
@@ -127,8 +128,10 @@ func (qcc *QCClient) onCommand(cmd *common.HttpCommand) error {
 						Sequence:     cmd.Sequence,
 						Code:         common.OK,
 					},
-					Header: response.Header,
-					Body:   c,
+					Header:           response.Header,
+					HttpResponseCode: response.StatusCode,
+					HttpResponseText: response.Status,
+					Body:             c,
 				})
 		}
 	}

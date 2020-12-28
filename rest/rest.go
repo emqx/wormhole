@@ -143,11 +143,15 @@ func processRequest(w http.ResponseWriter, req *http.Request) {
 			return
 		}
 		if hr, ok := resp.(*common.HttpResponse); ok {
+			if hr.HttpResponseCode != 200 {
+				http.Error(w, hr.HttpResponseText, hr.HttpResponseCode)
+			}
 			if hr.Header != nil {
 				for k, _ := range hr.Header {
 					w.Header().Set(k, hr.Header.Get(k))
 				}
 			}
+			//http.Error(w, "my own error message", http.StatusForbidden)
 			if hr.Body != nil {
 				w.Write(hr.Body)
 				return
