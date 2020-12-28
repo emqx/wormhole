@@ -9,15 +9,13 @@ import (
 	"quicdemo/rest"
 	"syscall"
 )
-var mgr = common.ListenerMgr{}
 
 func main() {
 	conf := common.GetConf()
 	if !conf.InitLog() {
 		return
 	}
-	ws := &server.WormholeServer{common.Addr, &mgr}
-	mgr.Add(ws)
+	ws := &server.WormholeServer{common.Addr}
 	go func() { ws.Start() }()
 	//Start rest service
 	srvRest := rest.CreateRestServer(9999)

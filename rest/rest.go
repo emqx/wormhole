@@ -119,10 +119,13 @@ func processRequest(w http.ResponseWriter, req *http.Request) {
 
 	body, err := ioutil.ReadAll(req.Body)
 
-	cmd := common.Command{
-		Identifier: id,
-		CType:      common.HTTP,
-		Payload: common.HttpRequest{
+	cmd := common.HttpCommand{
+		BasicCommand: common.BasicCommand{
+			Identifier: id,
+			Sequence:   common.GetNextId(),
+			CType:      common.HTTP,
+		},
+		HttpRequest: common.HttpRequest{
 			Method:   req.Method,
 			Host:     "",
 			Port:     ware.Port,
@@ -132,15 +135,26 @@ func processRequest(w http.ResponseWriter, req *http.Request) {
 			Body:     body,
 		},
 	}
-	if err := conn.IssueCommand(cmd); err != nil {
+	if resp, err := conn.SendCommand(&cmd); err != nil {
 		handleError(w, fmt.Errorf("Found error %s when trying to issue command to node %s.", err, id), "")
-		return
-	}
-
-	if nodes, err := common.NewNodeMemCache().List(); err != nil {
-		handleError(w, err, "")
 	} else {
-		jsonResponse(nodes, w)
+		if resp.GetResponseCode() != common.OK {
+			handleError(w, fmt.Errorf("Found error %s when trying to get command result for node %s.", resp.GetDescription(), id), "")
+			return
+		}
+		if hr, ok := resp.(*common.HttpResponse); ok {
+			if hr.Header != nil {
+				for k, _ := range hr.Header {
+					w.Header().Set(k, hr.Header.Get(k))
+				}
+			}
+			if hr.Body != nil {
+				w.Write(hr.Body)
+				return
+			}
+		} else {
+			handleError(w, fmt.Errorf("Not a valid http-response when get command result for node %s.", id), "")
+		}
 	}
 }
 

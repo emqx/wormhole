@@ -215,7 +215,6 @@ func NewMWMemoryCache() *MWMemoryCache {
 }
 
 type HttpRequest struct {
-
 	Schema   string
 	Method   string
 	Host     string
@@ -226,21 +225,20 @@ type HttpRequest struct {
 	Body     []byte
 }
 
-func (request *HttpRequest) ToURL() string {
+func (request *HttpRequest) ToString() string {
 	host := "127.0.0.1"
 	if request.Host != "" {
 		host = request.Host
 	}
+	schema := "http"
+	if request.Schema != "" {
+		schema = schema
+	}
 	port := 80
 	if request.Port != 80 {
 		port = request.Port
-		return fmt.Sprintf("%s://%s:%d%s", request.Schema, host, port, request.Path)
+		return fmt.Sprintf("%s://%s:%d/%s", schema, host, port, request.Path)
 	} else {
-		return fmt.Sprintf("%s://%s%s", request.Schema, host, request.Path)
+		return fmt.Sprintf("%s://%s/%s", schema, host, request.Path)
 	}
-}
-
-type HttpResponse struct {
-	Headers map[string]string
-	Body    []byte
 }

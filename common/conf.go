@@ -2,12 +2,12 @@ package common
 
 import (
 	"fmt"
+	filename "github.com/keepeye/logrus-filename"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"path"
 	"path/filepath"
-	"runtime"
 	"time"
 
 	"github.com/go-yaml/yaml"
@@ -94,14 +94,14 @@ func (this *config) initTimeout() {
 
 func (this *config) InitLog() bool {
 	Log = logrus.New()
-	Log.SetReportCaller(true)
+	filenameHook := filename.NewHook()
+	filenameHook.Field = "file"
+	Log.AddHook(filenameHook)
+
 	Log.SetFormatter(&logrus.TextFormatter{
-		CallerPrettyfier: func(f *runtime.Frame) (string, string) {
-			filename := path.Base(f.File)
-			return "", fmt.Sprintf("%s:%d", filename, f.Line)
-		},
-		DisableColors: true,
-		FullTimestamp: true,
+		TimestampFormat: "2006-01-02 15:04:05",
+		DisableColors:   true,
+		FullTimestamp:   true,
 	})
 
 	logFile, err := os.OpenFile(this.LogPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
