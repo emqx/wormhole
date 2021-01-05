@@ -2,44 +2,55 @@ package common
 
 import (
 	"fmt"
+	"github.com/go-yaml/yaml"
 	filename "github.com/keepeye/logrus-filename"
+	"github.com/sirupsen/logrus"
 	"io/ioutil"
-	"net/http"
 	"os"
 	"path"
 	"path/filepath"
-	"time"
-
-	"github.com/go-yaml/yaml"
-	"github.com/sirupsen/logrus"
 )
 
 type (
-	config struct {
-		Port         int    `yaml:"port"`
-		Timeout      int    `yaml:"timeout"`
-		IntervalTime int    `yaml:"intervalTime"`
-		Ip           string `yaml:"ip"`
+	BasicConfig struct {
+		QuicBindAddr string `yaml:"quicBindAddr"`
+		QuicBindPort int    `yaml:"quicBindPort"`
+		Debug        bool   `yaml:"debug"`
+		ConsoleLog   bool   `yaml:"consoleLog"`
 		LogPath      string `yaml:"logPath"`
+	}
+
+	ServerConfig struct {
+		Basic BasicConfig
+		RestBindAddr string `yaml:"restBindAddr"`
+		RestBindPort int    `yaml:"restBindPort"`
+	}
+
+	ClientConfig struct {
+		Basic BasicConfig
+		HttpTimeout int `yaml:"httpTimeout"`
 	}
 )
 
-var g_conf config
+//var WormholeBaseKey = "WormholeBaseKey"
+var Log *logrus.Logger
+var serverConf *ServerConfig
+var clientConf *ClientConfig
 
-func GetConf() *config {
-	return &g_conf
+func GetSrvConf() (*ServerConfig, bool) {
+	if serverConf == nil {
+		serverConf = &ServerConfig{}
+		return serverConf, serverConf.initSrvConfig()
+	}
+	return serverConf, true
 }
-func (this *config) GetIntervalTime() int {
-	return this.IntervalTime
-}
-func (this *config) GetIp() string {
-	return this.Ip
-}
-func (this *config) GetPort() int {
-	return this.Port
-}
-func (this *config) GetLogPath() string {
-	return this.LogPath
+
+func GetClientConf() (*ClientConfig, bool) {
+	if clientConf == nil {
+		clientConf = &ClientConfig{}
+		return clientConf, clientConf.initClientConfig()
+	}
+	return clientConf, clientConf.initClientConfig()
 }
 
 func processPath(path string) (string, error) {
@@ -53,46 +64,29 @@ func processPath(path string) (string, error) {
 	}
 }
 
-func (this *config) initConfig() bool {
-	confPath, err := processPath(os.Args[1])
-	if nil != err {
-		fmt.Println("conf path err : ", err)
-		return false
-	}
-	sliByte, err := ioutil.ReadFile(confPath)
+func loadConf(fname string) ([]byte, bool) {
+	var confPath, err = processPath("etc/" + fname)
+	content, err := ioutil.ReadFile(confPath)
 	if nil != err {
 		fmt.Println("load conf err : ", err)
-		return false
+		return nil, false
 	}
-	err = yaml.Unmarshal(sliByte, this)
-	if nil != err {
-		fmt.Println("unmashal conf err : ", err)
-		return false
-	}
+	return content, true
+}
 
-	if this.LogPath, err = filepath.Abs(this.LogPath); nil != err {
+func (conf BasicConfig) validateLogSettings() bool {
+	var err error
+	if conf.LogPath, err = filepath.Abs(conf.LogPath); nil != err {
 		fmt.Println("log dir err : ", err)
 		return false
 	}
-	if _, err = os.Stat(this.LogPath); os.IsNotExist(err) {
-		if err = os.MkdirAll(path.Dir(this.LogPath), 0755); nil != err {
-			fmt.Println("mak logdir err : ", err)
+	if _, err = os.Stat(conf.LogPath); os.IsNotExist(err) {
+		if err = os.MkdirAll(path.Dir(conf.LogPath), 0755); nil != err {
+			fmt.Println("make logdir err : ", err)
 			return false
 		}
 	}
-	return true
-}
 
-var (
-	Log      *logrus.Logger
-	g_client http.Client
-)
-
-func (this *config) initTimeout() {
-	g_client.Timeout = time.Duration(this.Timeout) * time.Millisecond
-}
-
-func (this *config) InitLog() bool {
 	Log = logrus.New()
 	filenameHook := filename.NewHook()
 	filenameHook.Field = "file"
@@ -104,7 +98,7 @@ func (this *config) InitLog() bool {
 		FullTimestamp:   true,
 	})
 
-	logFile, err := os.OpenFile(this.LogPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	logFile, err := os.OpenFile(conf.LogPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	if err == nil {
 		Log.SetOutput(logFile)
 		return true
@@ -114,14 +108,37 @@ func (this *config) InitLog() bool {
 	}
 }
 
-func (this *config) Init() bool {
-	if !this.initConfig() {
+func (conf *ServerConfig) initSrvConfig() bool {
+	d, ok := loadConf("server.yaml")
+	if !ok {
 		return false
 	}
 
-	if !this.InitLog() {
+	err := yaml.Unmarshal(d, conf)
+	if nil != err {
+		fmt.Println("unmashal conf err : ", err)
 		return false
 	}
-	this.initTimeout()
+
+	if !conf.Basic.validateLogSettings() {
+		return false
+	}
+	return true
+}
+
+func (conf *ClientConfig) initClientConfig() bool {
+	d, ok := loadConf("client.yaml")
+	if !ok {
+		return false
+	}
+
+	err := yaml.Unmarshal(d, conf)
+	if nil != err {
+		fmt.Println("unmashal conf err : ", err)
+		return false
+	}
+	if !conf.Basic.validateLogSettings() {
+		return false
+	}
 	return true
 }

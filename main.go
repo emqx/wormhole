@@ -1,34 +1,22 @@
 package main
 
 import (
-	"net/http"
+	"fmt"
 	"os"
-	"os/signal"
-	"quicdemo/common"
+	"quicdemo/internal/client"
 	"quicdemo/internal/server"
-	"quicdemo/rest"
-	"syscall"
+	"strings"
 )
 
 func main() {
-	conf := common.GetConf()
-	if !conf.InitLog() {
-		return
-	}
-	ws := &server.WormholeServer{common.Addr}
-	go func() { ws.Start() }()
-	//Start rest service
-	srvRest := rest.CreateRestServer(9999)
-	go func() {
-		var err error
-		err = srvRest.ListenAndServe()
-		if err != nil && err != http.ErrServerClosed {
-			//logger.Fatal("Error serving rest service: ", err)
+	if args := os.Args[1:]; len(args) == 2 {
+		if mode := strings.ToLower(args[0]); mode == "client" {
+			client.NewClient()
+		} else {
+			fmt.Println("Invalid argument, expect 'wormhole client d62ef200-4e59-11eb-9890-f45c89b00d3d`.")
+			return
 		}
-	}()
-
-	sigint := make(chan os.Signal, 1)
-	signal.Notify(sigint, os.Interrupt, syscall.SIGTERM)
-	<-sigint
-	os.Exit(0)
+	} else if len(args) == 0 {
+		server.NewServer()
+	}
 }

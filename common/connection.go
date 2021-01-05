@@ -11,7 +11,6 @@ import (
 	"time"
 )
 
-const Addr = "0.0.0.0:4242"
 
 type CmdType int
 const (
@@ -185,7 +184,7 @@ func (qc *QuicConnection) ListenToClient() {
 		} else {
 			request := map[string]interface{}{}
 			if err := json.Unmarshal(b, &request); err != nil {
-				fmt.Printf("%s\n", fmt.Sprintf("Found error %s when trying to unmarshal data from client %d.", qc.Stream.StreamID()))
+				Log.Errorf("%s\n", fmt.Sprintf("Found error %s when trying to unmarshal data from client %d.", qc.Stream.StreamID()))
 			} else {
 				if code, rt := request["Code"], request["ResponseType"];  code != nil && rt!= nil{
 					response := newResponse(rt)
@@ -261,7 +260,7 @@ func (qc *QuicConnection) SendCommand(cmd Command) (Response, error) {
 	if _, err := NewWriter(qc.Stream).Write(j); err != nil {
 		err1 = err
 	} else {
-		Log.Infof("The command %s is sent successfully", j)
+		Log.Debugf("The command %s is sent successfully", j)
 	}
 	if err1 != nil {
 		wg.Done()
@@ -277,7 +276,7 @@ func (qc *QuicConnection) sendResponse(resp BasicResponse) error {
 	if l, err := NewWriter(qc.Stream).Write(j); err != nil {
 		return err
 	} else {
-		Log.Infof("The response %s is issued successfully with len %d", j, l)
+		Log.Debugf("The response %s is issued successfully with len %d", j, l)
 	}
 	return nil
 }

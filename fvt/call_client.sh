@@ -1,6 +1,6 @@
 #!/bin/bash
 
-go build -o fvt/edge_client internal/client/client.go
+go build -o fvt/edge_client main.go
 chmod +x fvt/edge_client
 
 export BUILD_ID=dontKillMe
@@ -15,4 +15,4 @@ else
   done
 fi
 
-nohup fvt/edge_client $1 > edge_client.out 2>&1 &
+nohup fvt/edge_client client $1 > edge_client.out 2>&1 &

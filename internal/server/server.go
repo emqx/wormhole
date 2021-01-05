@@ -10,12 +10,43 @@ import (
 	"fmt"
 	quic "github.com/lucas-clemente/quic-go"
 	"math/big"
+	"net/http"
+	"os"
+	"os/signal"
 	"quicdemo/common"
+	"quicdemo/rest"
+	"syscall"
 	"time"
 )
 
 type WormholeServer struct {
 	BindAddr string
+}
+
+func NewServer() {
+	conf, ok := common.GetSrvConf()
+	if !ok {
+		fmt.Println("Failed to init configuration, exiting...")
+		return
+	}
+
+	ws := &WormholeServer{fmt.Sprintf("%s:%d", conf.Basic.QuicBindAddr, conf.Basic.QuicBindPort)}
+	go func() { ws.Start() }()
+	//Start rest service
+	srvRest := rest.CreateRestServer(conf.RestBindAddr, conf.RestBindPort)
+	go func() {
+		var err error
+		err = srvRest.ListenAndServe()
+		if err != nil && err != http.ErrServerClosed {
+			common.Log.Fatal("Error serving rest service: ", err)
+			os.Exit(1)
+		}
+	}()
+
+	sigint := make(chan os.Signal, 1)
+	signal.Notify(sigint, os.Interrupt, syscall.SIGTERM)
+	<-sigint
+	os.Exit(0)
 }
 
 // Start a rest that echos all data on the first stream opened by the internal
@@ -35,7 +66,7 @@ func (ws *WormholeServer) Start() {
 		}
 		go func() {
 			gstream, err := sess.AcceptStream(context)
-			fmt.Println("Accepted stream.")
+			//fmt.Println("Accepted stream.")
 			if err != nil {
 				panic(err)
 			}
@@ -69,6 +100,6 @@ func generateTLSConfig() *tls.Config {
 	}
 	return &tls.Config{
 		Certificates: []tls.Certificate{tlsCert},
-		NextProtos:   []string{"quic-echo-example"},
+		NextProtos:   []string{"emqx-wormhole"},
 	}
 }

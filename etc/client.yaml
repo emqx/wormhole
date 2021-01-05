@@ -1,0 +1,14 @@
+basic:
+  # The Quic server address
+  quicBindAddr: 127.0.0.1
+  # The Quic server port
+  quicBindPort: 4242
+
+  # Set log level, default to false
+  debug: false
+  # Print to console or not
+  consoleLog: false
+  logPath: log
+
+# The http timeout setting
+httpTimeout: 10

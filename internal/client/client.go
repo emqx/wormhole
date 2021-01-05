@@ -1,4 +1,4 @@
-package main
+package client
 
 import (
 	"bytes"
@@ -23,32 +23,21 @@ type QCClient struct {
 	cancel     context.CancelFunc
 }
 
-func (qcc *QCClient) sendRequest(r common.HttpRequest) (*http.Response, error) {
-	common.Log.Infof("URL is: %s", r.ToString())
-	if req, error := http.NewRequest(r.Method, r.ToString(), bytes.NewBuffer(r.Body)); error != nil {
-		return nil, error
-	} else {
-		req.Header = r.Headers
-		http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
-		client := &http.Client{}
-		return client.Do(req)
+func NewClient() {
+	conf, ok := common.GetClientConf()
+	if !ok {
+		fmt.Println("Failed to init configuration, exiting...")
+		return
 	}
-}
 
-// We start a rest echoing data on the first stream the internal opens,
-// then connect with a internal, send the message, and wait for its receipt.
-func main() {
-	args := os.Args[1:]
+	args := os.Args[2:]
 	if len(args) == 0 {
 		fmt.Printf("The node identifier is expected.")
 		os.Exit(0)
 	}
 
-	conf := common.GetConf()
-	conf.InitLog()
-
 	common.Log.Printf("The node identifier is %s\n", args[0])
-	qcc := QCClient{Server: "127.0.0.1:4242", Identifier: args[0]}
+	qcc := QCClient{Server: fmt.Sprintf("%s:%d", conf.Basic.QuicBindAddr, conf.Basic.QuicBindPort), Identifier: args[0]}
 
 	err := qcc.clientMain()
 	if err != nil {
@@ -62,10 +51,23 @@ func main() {
 	os.Exit(0)
 }
 
+func (qcc *QCClient) sendRequest(r common.HttpRequest) (*http.Response, error) {
+	common.Log.Debugf("URL is: %s", r.ToString())
+	if req, error := http.NewRequest(r.Method, r.ToString(), bytes.NewBuffer(r.Body)); error != nil {
+		common.Log.Errorf("Find error %s when producing request %v.", error, r)
+		return nil, error
+	} else {
+		req.Header = r.Headers
+		http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+		client := &http.Client{}
+		return client.Do(req)
+	}
+}
+
 func (qcc *QCClient) clientMain() error {
 	tlsConf := &tls.Config{
 		InsecureSkipVerify: true,
-		NextProtos:         []string{"quic-echo-example"},
+		NextProtos:         []string{"emqx-wormhole"},
 	}
 
 	session, err := quic.DialAddr(qcc.Server, tlsConf, &quic.Config{KeepAlive: true, HandshakeTimeout: 10 * time.Second,})
@@ -110,7 +112,7 @@ func (qcc *QCClient) onCommand(cmd *common.HttpCommand) error {
 			Description:  err1.Error(),
 		})
 	} else {
-		common.Log.Infof("headers from remote server %v", response.Header)
+		common.Log.Debugf("headers from remote server %v", response.Header)
 		if c, e := getContent(*response); e != nil {
 			return qcc.WriteTo(common.BasicResponse{
 				Identifier:   qcc.Identifier,
@@ -152,9 +154,7 @@ func (qcc *QCClient) ListenToSrv() {
 		if rawData, err := common.NewReader(qcc.Stream).Read(); err != nil {
 			qcc.cancel()
 			break
-			//qcc.ListenMgr.NotifyAll(common.ERROR, []byte("Found error when trying to get result from rest."))
 		} else {
-			//common.Log.Printf("From rest %s", rawData)
 			result := map[string]interface{}{}
 			if e := json.Unmarshal(rawData, &result); e != nil {
 				common.Log.Errorf("Found error when trying to unmarshal data from server %s", rawData)
@@ -169,8 +169,7 @@ func (qcc *QCClient) ListenToSrv() {
 					}
 					continue
 				} else if t := result["CType"]; t != nil {
-					//qcc.ListenMgr.NotifyAll(common.COMMAND, rawData)
-					common.Log.Printf("%s", rawData)
+					common.Log.Debugf("%s", rawData)
 					t1, _ := t.(float64)
 					if common.HTTP == common.CmdType(int64(t1)) {
 						hcmd := common.HttpCommand{}

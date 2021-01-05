@@ -1,0 +1,15 @@
+basic:
+  # The Quic server address
+  quicBindAddr: 0.0.0.0
+  # The Quic server port
+  quicBindPort: 4242
+  # Set log level, default to false
+  debug: false
+  # Print to console or not
+  consoleLog: false
+  logPath: log
+
+#The rest server bind address
+restBindAddr: 0.0.0.0
+#The rest server bind port
+restBindPort: 9999

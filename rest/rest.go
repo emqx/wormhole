@@ -151,7 +151,6 @@ func processRequest(w http.ResponseWriter, req *http.Request) {
 					w.Header().Set(k, hr.Header.Get(k))
 				}
 			}
-			//http.Error(w, "my own error message", http.StatusForbidden)
 			if hr.Body != nil {
 				w.Write(hr.Body)
 				return
@@ -221,7 +220,7 @@ func mdelete(w http.ResponseWriter, req *http.Request) {
 }
 
 
-func CreateRestServer(port int) *http.Server {
+func CreateRestServer(srv string, port int) *http.Server {
 	r := mux.NewRouter()
 
 	r.HandleFunc("/nodes/register", register).Methods(http.MethodPost)
@@ -237,7 +236,7 @@ func CreateRestServer(port int) *http.Server {
 	r.HandleFunc("/wh/{id}/{mware}/{rest:[a-zA-Z0-9_=\\-\\/@\\.:%\\+~#\\?&]+}", processRequest).Methods(http.MethodPost, http.MethodGet, http.MethodDelete, http.MethodPut)
 
 	server := &http.Server{
-		Addr: fmt.Sprintf("0.0.0.0:%d", port),
+		Addr: fmt.Sprintf("%s:%d", srv, port),
 		// Good practice to set timeouts to avoid Slowloris attacks.
 		WriteTimeout: time.Second * 60 * 5,
 		ReadTimeout:  time.Second * 60 * 5,
