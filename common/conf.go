@@ -12,30 +12,40 @@ import (
 )
 
 type (
-	BasicConfig struct {
-		QuicBindAddr string `yaml:"quicBindAddr"`
-		QuicBindPort int    `yaml:"quicBindPort"`
-		Debug        bool   `yaml:"debug"`
-		ConsoleLog   bool   `yaml:"consoleLog"`
-		LogPath      string `yaml:"logPath"`
+	LogConfig struct {
+		Debug      bool   `yaml:"debug"`
+		ConsoleLog bool   `yaml:"consoleLog"`
+		LogPath    string `yaml:"logPath"`
 	}
 
 	ServerConfig struct {
-		Basic BasicConfig
-		RestBindAddr string `yaml:"restBindAddr"`
-		RestBindPort int    `yaml:"restBindPort"`
+		Basic struct{
+			BindAddr string `yaml:"bindAddr"`
+			BindPort int    `yaml:"bindPort"`
+		}
+		Log LogConfig
+		Rest struct{
+			RestBindAddr string `yaml:"restBindAddr"`
+			RestBindPort int    `yaml:"restBindPort"`
+			EnableRest   bool   `yaml:"enableRest"`
+		}
 	}
 
-	ClientConfig struct {
-		Basic BasicConfig
-		HttpTimeout int `yaml:"httpTimeout"`
+	AgentConfig struct {
+		Basic struct{
+			Server string `yaml:"server"`
+			Port   int    `yaml:"port"`
+		}
+		Log LogConfig
+		Miscs struct{
+			HttpTimeout int `yaml:"httpTimeout"`
+		}
 	}
 )
 
-//var WormholeBaseKey = "WormholeBaseKey"
 var Log *logrus.Logger
 var serverConf *ServerConfig
-var clientConf *ClientConfig
+var clientConf *AgentConfig
 
 func GetSrvConf() (*ServerConfig, bool) {
 	if serverConf == nil {
@@ -45,9 +55,9 @@ func GetSrvConf() (*ServerConfig, bool) {
 	return serverConf, true
 }
 
-func GetClientConf() (*ClientConfig, bool) {
+func GetAgentConf() (*AgentConfig, bool) {
 	if clientConf == nil {
-		clientConf = &ClientConfig{}
+		clientConf = &AgentConfig{}
 		return clientConf, clientConf.initClientConfig()
 	}
 	return clientConf, clientConf.initClientConfig()
@@ -74,7 +84,7 @@ func loadConf(fname string) ([]byte, bool) {
 	return content, true
 }
 
-func (conf BasicConfig) validateLogSettings() bool {
+func (conf LogConfig) validateLogSettings() bool {
 	var err error
 	if conf.LogPath, err = filepath.Abs(conf.LogPath); nil != err {
 		fmt.Println("log dir err : ", err)
@@ -120,13 +130,13 @@ func (conf *ServerConfig) initSrvConfig() bool {
 		return false
 	}
 
-	if !conf.Basic.validateLogSettings() {
+	if !conf.Log.validateLogSettings() {
 		return false
 	}
 	return true
 }
 
-func (conf *ClientConfig) initClientConfig() bool {
+func (conf *AgentConfig) initClientConfig() bool {
 	d, ok := loadConf("client.yaml")
 	if !ok {
 		return false
@@ -137,7 +147,7 @@ func (conf *ClientConfig) initClientConfig() bool {
 		fmt.Println("unmashal conf err : ", err)
 		return false
 	}
-	if !conf.Basic.validateLogSettings() {
+	if !conf.Log.validateLogSettings() {
 		return false
 	}
 	return true

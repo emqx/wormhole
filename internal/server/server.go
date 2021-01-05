@@ -30,18 +30,21 @@ func NewServer() {
 		return
 	}
 
-	ws := &WormholeServer{fmt.Sprintf("%s:%d", conf.Basic.QuicBindAddr, conf.Basic.QuicBindPort)}
+	ws := &WormholeServer{fmt.Sprintf("%s:%d", conf.Basic.BindAddr, conf.Basic.BindPort)}
 	go func() { ws.Start() }()
-	//Start rest service
-	srvRest := rest.CreateRestServer(conf.RestBindAddr, conf.RestBindPort)
-	go func() {
-		var err error
-		err = srvRest.ListenAndServe()
-		if err != nil && err != http.ErrServerClosed {
-			common.Log.Fatal("Error serving rest service: ", err)
-			os.Exit(1)
-		}
-	}()
+
+	if conf.Rest.EnableRest {
+		//Start rest service
+		srvRest := rest.CreateRestServer(conf.Rest.RestBindAddr, conf.Rest.RestBindPort)
+		go func() {
+			var err error
+			err = srvRest.ListenAndServe()
+			if err != nil && err != http.ErrServerClosed {
+				common.Log.Fatal("Error serving rest service: ", err)
+				os.Exit(1)
+			}
+		}()
+	}
 
 	sigint := make(chan os.Signal, 1)
 	signal.Notify(sigint, os.Interrupt, syscall.SIGTERM)

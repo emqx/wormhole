@@ -41,7 +41,7 @@ func handleError(w http.ResponseWriter, err error, prefix string) {
 
 func register(w http.ResponseWriter, req *http.Request) {
 	defer req.Body.Close()
-	node := common.Node{}
+	node := common.Agent{}
 	err := json.NewDecoder(req.Body).Decode(&node)
 	if err != nil {
 		handleError(w, err, "")
@@ -71,7 +71,7 @@ func delete(w http.ResponseWriter, req *http.Request) {
 
 func update(w http.ResponseWriter, req *http.Request) {
 	defer req.Body.Close()
-	node := common.Node{}
+	node := common.Agent{}
 	err := json.NewDecoder(req.Body).Decode(&node)
 	if err != nil {
 		handleError(w, err, "")

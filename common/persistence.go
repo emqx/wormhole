@@ -3,10 +3,9 @@ package common
 import (
 	"fmt"
 	"github.com/google/uuid"
-	"net/http"
 )
 
-type Node struct {
+type Agent struct {
 	Name        string `json:"name" yaml:"name"`
 	Identifier  string `json:"identifier" yaml:"identifier"`
 	Description string `json:"description" yaml:"description"`
@@ -18,50 +17,50 @@ type Middleware struct {
 	Port int    `json:"port" yaml:"port"`
 }
 
-type NodeManager interface {
-	List() ([]Node, error)
-	Add(node Node) (*Node, error)
-	Update(node Node) (*Node, error)
+type AgentManager interface {
+	List() ([]Agent, error)
+	Add(node Agent) (*Agent, error)
+	Update(node Agent) (*Agent, error)
 	DeleteById(identifier string) (error)
 }
 
-type NodeMemoryCache struct {
-	Cache map[string]*Node
+type AgentMemoryManager struct {
+	Cache map[string]*Agent
 }
 
-var nmCache *NodeMemoryCache
+var amCache *AgentMemoryManager
 
-func NewNodeMemCache() *NodeMemoryCache {
-	if nmCache == nil {
-		nmCache = &NodeMemoryCache{}
-		nmCache.Cache = make(map[string]*Node)
+func NewNodeMemCache() *AgentMemoryManager {
+	if amCache == nil {
+		amCache = &AgentMemoryManager{}
+		amCache.Cache = make(map[string]*Agent)
 	}
-	return nmCache
+	return amCache
 }
 
-func (n *Node) validate() bool {
+func (n *Agent) validate() bool {
 	if n.Name == "" {
 		return false
 	}
 	return true
 }
 
-func (nc *NodeMemoryCache) List() ([]Node, error) {
-	mwares := make([]Node, 0)
+func (nc *AgentMemoryManager) List() ([]Agent, error) {
+	mwares := make([]Agent, 0)
 	for _, v := range nc.Cache {
 		mwares = append(mwares, *v)
 	}
 	return mwares, nil
 }
 
-func (nc *NodeMemoryCache) Add(n Node) (*Node, error) {
+func (nc *AgentMemoryManager) Add(n Agent) (*Agent, error) {
 	uuid, _ := uuid.NewUUID()
 	n.Identifier = uuid.String()
 	nc.Cache[n.Identifier] = &n
 	return &n, nil
 }
 
-func (nc *NodeMemoryCache) Update(n Node) (*Node, error) {
+func (nc *AgentMemoryManager) Update(n Agent) (*Agent, error) {
 	if !n.validate() {
 		return nil, fmt.Errorf("Not valid node settings %v", n)
 	}
@@ -72,7 +71,7 @@ func (nc *NodeMemoryCache) Update(n Node) (*Node, error) {
 	return &n, nil
 }
 
-func (nc *NodeMemoryCache) DeleteById(id string) (error) {
+func (nc *AgentMemoryManager) DeleteById(id string) (error) {
 	if id == "" {
 		return fmt.Errorf("id %s cannot be empty", id)
 	}
@@ -212,33 +211,4 @@ func NewMWMemoryCache() *MWMemoryCache {
 		memCache.Cache = map[string]Middlewares{}
 	}
 	return memCache
-}
-
-type HttpRequest struct {
-	Schema   string
-	Method   string
-	Host     string
-	Port     int
-	BasePath string
-	Path     string
-	Headers  http.Header
-	Body     []byte
-}
-
-func (request *HttpRequest) ToString() string {
-	host := "127.0.0.1"
-	if request.Host != "" {
-		host = request.Host
-	}
-	schema := "http"
-	if request.Schema != "" {
-		schema = schema
-	}
-	port := 80
-	if request.Port != 80 {
-		port = request.Port
-		return fmt.Sprintf("%s://%s:%d/%s", schema, host, port, request.Path)
-	} else {
-		return fmt.Sprintf("%s://%s/%s", schema, host, request.Path)
-	}
 }

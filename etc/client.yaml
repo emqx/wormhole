@@ -1,14 +1,17 @@
 basic:
-  # The Quic server address
-  quicBindAddr: 127.0.0.1
-  # The Quic server port
-  quicBindPort: 4242
+  # The wormhole server address
+  server: 127.0.0.1
+  # The wormhole server port
+  port: 4242
 
+log:
   # Set log level, default to false
   debug: false
   # Print to console or not
   consoleLog: false
+  # The log path
   logPath: log
 
-# The http timeout setting
-httpTimeout: 10
+miscs:
+  # The http timeout setting
+  httpTimeout: 10

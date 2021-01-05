@@ -102,10 +102,10 @@
             </JSONPostProcessor>
             <hashTree/>
           </hashTree>
-          <SystemSampler guiclass="SystemSamplerGui" testclass="SystemSampler" testname="InvokeClient" enabled="true">
+          <SystemSampler guiclass="SystemSamplerGui" testclass="SystemSampler" testname="InvokeAgent" enabled="true">
             <boolProp name="SystemSampler.checkReturnCode">true</boolProp>
             <stringProp name="SystemSampler.expectedReturnCode">0</stringProp>
-            <stringProp name="SystemSampler.command">fvt/call_client.sh</stringProp>
+            <stringProp name="SystemSampler.command">fvt/call_agent.sh</stringProp>
             <elementProp name="SystemSampler.arguments" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
               <collectionProp name="Arguments.arguments">
                 <elementProp name="" elementType="Argument">

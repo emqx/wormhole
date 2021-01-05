@@ -318,3 +318,32 @@ func (sq *sequenceIDGenerator) inc() int{
 func GetNextId() int {
 	return generator.inc()
 }
+
+type HttpRequest struct {
+	Schema   string
+	Method   string
+	Host     string
+	Port     int
+	BasePath string
+	Path     string
+	Headers  http.Header
+	Body     []byte
+}
+
+func (request *HttpRequest) ToString() string {
+	host := "127.0.0.1"
+	if request.Host != "" {
+		host = request.Host
+	}
+	schema := "http"
+	if request.Schema != "" {
+		schema = schema
+	}
+	port := 80
+	if request.Port != 80 {
+		port = request.Port
+		return fmt.Sprintf("%s://%s:%d/%s", schema, host, port, request.Path)
+	} else {
+		return fmt.Sprintf("%s://%s/%s", schema, host, request.Path)
+	}
+}

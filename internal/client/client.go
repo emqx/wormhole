@@ -24,7 +24,7 @@ type QCClient struct {
 }
 
 func NewClient() {
-	conf, ok := common.GetClientConf()
+	conf, ok := common.GetAgentConf()
 	if !ok {
 		fmt.Println("Failed to init configuration, exiting...")
 		return
@@ -37,7 +37,7 @@ func NewClient() {
 	}
 
 	common.Log.Printf("The node identifier is %s\n", args[0])
-	qcc := QCClient{Server: fmt.Sprintf("%s:%d", conf.Basic.QuicBindAddr, conf.Basic.QuicBindPort), Identifier: args[0]}
+	qcc := QCClient{Server: fmt.Sprintf("%s:%d", conf.Basic.Server, conf.Basic.Port), Identifier: args[0]}
 
 	err := qcc.clientMain()
 	if err != nil {
