@@ -8,6 +8,8 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
+	"github.com/jinfahua/wormhole/common"
+	"github.com/jinfahua/wormhole/rest"
 	quic "github.com/lucas-clemente/quic-go"
 	"math/big"
 	"net/http"
@@ -15,8 +17,6 @@ import (
 	"os/signal"
 	"syscall"
 	"time"
-	"wormhole/common"
-	"wormhole/rest"
 )
 
 type WormholeServer struct {
