@@ -6,6 +6,7 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
+	"github.com/jinfahua/wormhole/common"
 	quic "github.com/lucas-clemente/quic-go"
 	"io/ioutil"
 	"net/http"
@@ -13,7 +14,6 @@ import (
 	"os/signal"
 	"syscall"
 	"time"
-	"wormhole/common"
 )
 
 type QCClient struct {

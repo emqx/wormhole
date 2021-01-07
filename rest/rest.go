@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
+	"github.com/jinfahua/wormhole/common"
 	"io/ioutil"
 	"net/http"
 	"time"
-	"wormhole/common"
 )
 
 const (

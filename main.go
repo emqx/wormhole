@@ -2,10 +2,10 @@ package main
 
 import (
 	"fmt"
+	"github.com/jinfahua/wormhole/internal/client"
+	"github.com/jinfahua/wormhole/internal/server"
 	"os"
 	"strings"
-	"wormhole/internal/client"
-	"wormhole/internal/server"
 )
 
 func main() {
