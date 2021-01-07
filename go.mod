@@ -1,4 +1,4 @@
-module quicdemo
+module wormhole
 
 go 1.15
 
