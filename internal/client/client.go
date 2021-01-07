@@ -11,9 +11,9 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"quicdemo/common"
 	"syscall"
 	"time"
+	"wormhole/common"
 )
 
 type QCClient struct {
@@ -70,7 +70,7 @@ func (qcc *QCClient) clientMain() error {
 		NextProtos:         []string{"emqx-wormhole"},
 	}
 
-	session, err := quic.DialAddr(qcc.Server, tlsConf, &quic.Config{KeepAlive: true, HandshakeTimeout: 10 * time.Second,})
+	session, err := quic.DialAddr(qcc.Server, tlsConf, &quic.Config{KeepAlive: true, HandshakeTimeout: 10 * time.Second})
 	if err != nil {
 		return err
 	}
@@ -161,7 +161,7 @@ func (qcc *QCClient) ListenToSrv() {
 			} else {
 				if result["Code"] != nil {
 					response := common.BasicResponse{}
-					err := json.Unmarshal(rawData, &response);
+					err := json.Unmarshal(rawData, &response)
 					if err != nil {
 						common.Log.Errorf("Invalid response packet from server %s", err)
 					} else {
@@ -173,7 +173,7 @@ func (qcc *QCClient) ListenToSrv() {
 					t1, _ := t.(float64)
 					if common.HTTP == common.CmdType(int64(t1)) {
 						hcmd := common.HttpCommand{}
-						err := json.Unmarshal(rawData, &hcmd);
+						err := json.Unmarshal(rawData, &hcmd)
 						if err != nil {
 							common.Log.Errorf("Invalid packet from server %s", err)
 						} else {
