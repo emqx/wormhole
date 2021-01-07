@@ -120,7 +120,6 @@ func (h *PackageHeader) GetFlags() uint8 {
 	return h.Flags
 }
 
-
 // do packing
 func (h *PackageHeader) Pack(buffer *[]byte) {
 	*buffer = append(*buffer,
@@ -149,7 +148,6 @@ func (h *PackageHeader) Unpack(header []byte) {
 		uint32(header[PayloadLenOffset+2])<<8 |
 		uint32(header[PayloadLenOffset+3])
 }
-
 
 type Writer struct {
 	Writer io.Writer

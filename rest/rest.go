@@ -7,8 +7,8 @@ import (
 	"github.com/gorilla/mux"
 	"io/ioutil"
 	"net/http"
-	"quicdemo/common"
 	"time"
+	"wormhole/common"
 )
 
 const (
@@ -61,7 +61,7 @@ func delete(w http.ResponseWriter, req *http.Request) {
 	defer req.Body.Close()
 	vars := mux.Vars(req)
 	id := vars["id"]
-	if err:= common.NewNodeMemCache().DeleteById(id); err != nil {
+	if err := common.NewNodeMemCache().DeleteById(id); err != nil {
 		handleError(w, err, "")
 	} else {
 		w.WriteHeader(http.StatusOK)
@@ -211,14 +211,13 @@ func mdelete(w http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
 	id := vars["id"]
 	name := vars["name"]
-	if err:= common.NewMWMemoryCache().DeleteByName(id, name); err != nil {
+	if err := common.NewMWMemoryCache().DeleteByName(id, name); err != nil {
 		handleError(w, err, "")
 	} else {
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte(fmt.Sprintf("%s under node %s is deleted.", name, id)))
 	}
 }
-
 
 func CreateRestServer(srv string, port int) *http.Server {
 	r := mux.NewRouter()

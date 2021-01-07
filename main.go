@@ -3,9 +3,9 @@ package main
 import (
 	"fmt"
 	"os"
-	"quicdemo/internal/client"
-	"quicdemo/internal/server"
 	"strings"
+	"wormhole/internal/client"
+	"wormhole/internal/server"
 )
 
 func main() {

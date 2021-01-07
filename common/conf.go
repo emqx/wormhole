@@ -19,12 +19,12 @@ type (
 	}
 
 	ServerConfig struct {
-		Basic struct{
+		Basic struct {
 			BindAddr string `yaml:"bindAddr"`
 			BindPort int    `yaml:"bindPort"`
 		}
-		Log LogConfig
-		Rest struct{
+		Log  LogConfig
+		Rest struct {
 			RestBindAddr string `yaml:"restBindAddr"`
 			RestBindPort int    `yaml:"restBindPort"`
 			EnableRest   bool   `yaml:"enableRest"`
@@ -32,12 +32,12 @@ type (
 	}
 
 	AgentConfig struct {
-		Basic struct{
+		Basic struct {
 			Server string `yaml:"server"`
 			Port   int    `yaml:"port"`
 		}
-		Log LogConfig
-		Miscs struct{
+		Log   LogConfig
+		Miscs struct {
 			HttpTimeout int `yaml:"httpTimeout"`
 		}
 	}

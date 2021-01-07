@@ -21,7 +21,7 @@ type AgentManager interface {
 	List() ([]Agent, error)
 	Add(node Agent) (*Agent, error)
 	Update(node Agent) (*Agent, error)
-	DeleteById(identifier string) (error)
+	DeleteById(identifier string) error
 }
 
 type AgentMemoryManager struct {
@@ -71,7 +71,7 @@ func (nc *AgentMemoryManager) Update(n Agent) (*Agent, error) {
 	return &n, nil
 }
 
-func (nc *AgentMemoryManager) DeleteById(id string) (error) {
+func (nc *AgentMemoryManager) DeleteById(id string) error {
 	if id == "" {
 		return fmt.Errorf("id %s cannot be empty", id)
 	}
@@ -85,11 +85,11 @@ type MiddlewareManager interface {
 	List(nodeid string) (Middlewares, error)
 	Add(nodeid string, middleware Middleware) (*Middleware, error)
 	Update(nodeid string, middleware Middleware) (*Middleware, error)
-	DeleteByName(nodeid string, name string) (error)
-	GetByName(nodeid string, name string) (error)
+	DeleteByName(nodeid string, name string) error
+	GetByName(nodeid string, name string) error
 }
 
-func (mws *Middlewares) GetMiddlewareByName(name string) (*Middleware) {
+func (mws *Middlewares) GetMiddlewareByName(name string) *Middleware {
 	for _, mw := range *mws {
 		if mw.Name == name {
 			return &mw
@@ -107,7 +107,7 @@ func (mc *MWMemoryCache) List(nodeid string) ([]Middleware, error) {
 	if mws == nil {
 		return nil, fmt.Errorf("Cannot find middlewares for id %s", nodeid)
 	}
-	mwares := make(Middlewares,0)
+	mwares := make(Middlewares, 0)
 	for _, v := range mws {
 		mwares = append(mwares, v)
 	}
@@ -128,7 +128,7 @@ func (mc *MWMemoryCache) Add(nodeid string, m Middleware) (*Middleware, error) {
 	return &m, nil
 }
 
-func (mc *Middleware) validateMiddleware() (bool) {
+func (mc *Middleware) validateMiddleware() bool {
 	if mc.Name == "" || mc.Path == "" || mc.Port == 0 {
 		return false
 	}
@@ -163,7 +163,7 @@ func removeMware(middlewares Middlewares, s int) Middlewares {
 	return append(middlewares[:s], middlewares[s+1:]...)
 }
 
-func (mc *MWMemoryCache) DeleteByName(nodeid string, name string) (error) {
+func (mc *MWMemoryCache) DeleteByName(nodeid string, name string) error {
 	if nodeid == "" || name == "" {
 		return fmt.Errorf("nodeid or name cannot be empty ")
 	}

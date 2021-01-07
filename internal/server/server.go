@@ -13,10 +13,10 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"quicdemo/common"
-	"quicdemo/rest"
 	"syscall"
 	"time"
+	"wormhole/common"
+	"wormhole/rest"
 )
 
 type WormholeServer struct {
@@ -54,7 +54,7 @@ func NewServer() {
 
 // Start a rest that echos all data on the first stream opened by the internal
 func (ws *WormholeServer) Start() {
-	listener, err := quic.ListenAddr(ws.BindAddr, generateTLSConfig(), &quic.Config{KeepAlive:true, HandshakeTimeout: 10 * time.Second})
+	listener, err := quic.ListenAddr(ws.BindAddr, generateTLSConfig(), &quic.Config{KeepAlive: true, HandshakeTimeout: 10 * time.Second})
 	if err != nil {
 		fmt.Println(err)
 		return

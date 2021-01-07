@@ -11,8 +11,8 @@ import (
 	"time"
 )
 
-
 type CmdType int
+
 const (
 	ILLEGAL CmdType = iota
 	REGISTER
@@ -20,6 +20,7 @@ const (
 )
 
 type ResponseCode int
+
 const (
 	OK ResponseCode = iota
 	BAD_REQUEST
@@ -27,11 +28,11 @@ const (
 )
 
 type ResponseType int
+
 const (
-	BASIC_R  ResponseType = iota
+	BASIC_R ResponseType = iota
 	HTTP_R
 )
-
 
 type Command interface {
 	GetSequence() int
@@ -110,15 +111,15 @@ type HttpResponse struct {
 	Body             []byte
 }
 
-func (r *BasicResponse)GetSequence() int {
+func (r *BasicResponse) GetSequence() int {
 	return r.Sequence
 }
 
-func (r *BasicResponse)GetResponseCode() ResponseCode {
+func (r *BasicResponse) GetResponseCode() ResponseCode {
 	return r.Code
 }
 
-func(r *BasicResponse)GetDescription() string {
+func (r *BasicResponse) GetDescription() string {
 	return r.Description
 }
 
@@ -127,7 +128,7 @@ func (r *BasicResponse) Json() []byte {
 	return j
 }
 
-func (r *BasicResponse)Validate() error {
+func (r *BasicResponse) Validate() error {
 	if r.Identifier == "" || r.Sequence == 0 {
 		return fmt.Errorf("Invalid response, either identifier is empty or sequenct is 0.")
 	}
@@ -186,7 +187,7 @@ func (qc *QuicConnection) ListenToClient() {
 			if err := json.Unmarshal(b, &request); err != nil {
 				Log.Errorf("%s\n", fmt.Sprintf("Found error %s when trying to unmarshal data from client %d.", qc.Stream.StreamID()))
 			} else {
-				if code, rt := request["Code"], request["ResponseType"];  code != nil && rt!= nil{
+				if code, rt := request["Code"], request["ResponseType"]; code != nil && rt != nil {
 					response := newResponse(rt)
 					if err := json.Unmarshal(b, &response); err != nil {
 						Log.Errorf("It's not a valid command response packet: %v", err)
@@ -247,8 +248,8 @@ func (qc *QuicConnection) SendCommand(cmd Command) (Response, error) {
 	var wg sync.WaitGroup
 	wg.Add(1)
 	cs := commandStatus{
-		status:   make(chan int),
-		timeout:  10,
+		status:  make(chan int),
+		timeout: 10,
 	}
 	if qc.commandStatus == nil {
 		qc.commandStatus = make(map[int]*commandStatus)
@@ -303,12 +304,12 @@ func (qcm QConnectionManager) GetConn(id string) *QuicConnection {
 
 type sequenceIDGenerator struct {
 	sequence int
-	mu sync.Mutex
+	mu       sync.Mutex
 }
 
 var generator = &sequenceIDGenerator{}
 
-func (sq *sequenceIDGenerator) inc() int{
+func (sq *sequenceIDGenerator) inc() int {
 	sq.mu.Lock()
 	defer sq.mu.Unlock()
 	sq.sequence++

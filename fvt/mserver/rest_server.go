@@ -27,7 +27,7 @@ func getstream(w http.ResponseWriter, req *http.Request) {
 //{"sql":"create stream my_stream (id bigint, name string, score float) WITH ( datasource = \"topic/temperature\", FORMAT = \"json\", KEY = \"id\")"}
 
 type stream struct {
-	Sql    string `json:"sql"`
+	Sql string `json:"sql"`
 }
 
 func poststream(w http.ResponseWriter, req *http.Request) {
@@ -37,7 +37,6 @@ func poststream(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		fmt.Printf("%s\n", err)
 	}
-
 
 	result := map[string]interface{}{
 		"result": "success",
