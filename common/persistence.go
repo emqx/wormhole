@@ -7,7 +7,7 @@ import (
 
 type Agent struct {
 	Name        string `json:"name" yaml:"name"`
-	Identifier  string `json:"identifier" yaml:"identifier"`
+	Identifier  string `json:"identifier" yaml:"identifier gorm:"primary_key;"`
 	Description string `json:"description" yaml:"description"`
 }
 
