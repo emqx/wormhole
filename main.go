@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	"github.com/jinfahua/wormhole/internal/client"
-	"github.com/jinfahua/wormhole/internal/server"
+	"github.com/jinfahua/wormhole/client"
+	"github.com/jinfahua/wormhole/server"
 	"os"
 	"strings"
 )
