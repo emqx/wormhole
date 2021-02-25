@@ -6,7 +6,7 @@ import (
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/jinfahua/wormhole/common"
-	"io/ioutil"
+	//	"io/ioutil"
 	"net/http"
 	"time"
 )
@@ -117,7 +117,7 @@ func processRequest(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	body, err := ioutil.ReadAll(req.Body)
+	//body, err := ioutil.ReadAll(req.Body)
 
 	cmd := common.HttpCommand{
 		BasicCommand: common.BasicCommand{
@@ -132,7 +132,7 @@ func processRequest(w http.ResponseWriter, req *http.Request) {
 			BasePath: ware.Path,
 			Path:     rest,
 			Headers:  req.Header,
-			Body:     body,
+			Body:     req.Body,
 		},
 	}
 	if resp, err := conn.SendCommand(&cmd); err != nil {

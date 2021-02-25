@@ -1,7 +1,7 @@
 package client
 
 import (
-	"bytes"
+	//"bytes"
 	"context"
 	"crypto/tls"
 	"encoding/json"
@@ -53,7 +53,8 @@ func NewClient() {
 
 func (qcc *QCClient) sendRequest(r common.HttpRequest) (*http.Response, error) {
 	common.Log.Debugf("URL is: %s", r.ToString())
-	if req, error := http.NewRequest(r.Method, r.ToString(), bytes.NewBuffer(r.Body)); error != nil {
+	//if req, error := http.NewRequest(r.Method, r.ToString(), bytes.NewBuffer(r.Body)); error != nil {
+	if req, error := http.NewRequest(r.Method, r.ToString(), r.Body); error != nil {
 		common.Log.Errorf("Find error %s when producing request %v.", error, r)
 		return nil, error
 	} else {

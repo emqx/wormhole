@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/lucas-clemente/quic-go"
 	"github.com/sirupsen/logrus"
+	"io"
 	"net/http"
 	"sync"
 	"time"
@@ -328,7 +329,7 @@ type HttpRequest struct {
 	BasePath string
 	Path     string
 	Headers  http.Header
-	Body     []byte
+	Body     io.ReadCloser
 }
 
 func (request *HttpRequest) ToString() string {
