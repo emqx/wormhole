@@ -3,12 +3,12 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/emqx/wormhole/rest"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"net/http"
 	"os"
 	"os/signal"
-	"quicdemo/rest"
 	"syscall"
 	"time"
 )

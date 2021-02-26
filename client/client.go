@@ -6,7 +6,7 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
-	"github.com/jinfahua/wormhole/common"
+	"github.com/emqx/wormhole/common"
 	quic "github.com/lucas-clemente/quic-go"
 	"io/ioutil"
 	"net/http"

@@ -3,9 +3,9 @@ package rest
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/emqx/wormhole/common"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
-	"github.com/jinfahua/wormhole/common"
 	"io/ioutil"
 	"net/http"
 	"time"
