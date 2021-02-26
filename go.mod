@@ -1,4 +1,4 @@
-module github.com/jinfahua/wormhole
+module github.com/emqx/wormhole
 
 go 1.15
 
