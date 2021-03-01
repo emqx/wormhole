@@ -2,7 +2,7 @@ name: Run fvt tests
 
 on:
   push:
-    tags:
+    tags: "[0-9]+.[0-9]+.[0-9]+"
   pull_request:
   release:
     types:
@@ -44,7 +44,6 @@ jobs:
         ./fvt/run_jmeter.sh
     - name: check logs
       run: |
-        set -e -u -x
         sudo apt update && sudo apt install -y libxml2-utils
         cd jmeter_logs
         if [ ! -z "$(cat *.jtl| grep '<failure>' | awk -F '>' '{print $2}' | awk -F '<' '{print $1}' | grep true)" ] ||
