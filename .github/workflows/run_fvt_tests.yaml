@@ -1,0 +1,62 @@
+name: Run fvt tests
+
+on:
+  push:
+    tags:
+  pull_request:
+  release:
+    types:
+      - published
+
+jobs:
+  run_fvt_tests:
+
+    runs-on: ubuntu-20.04
+
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-go@v2
+      with:
+        go-version: '1.15.1' # The Go version to download (if necessary) and use.
+    - uses: actions/setup-java@v1
+      with:
+        java-version: '8' # The JDK version to make available on the path.
+        java-package: jdk # (jre, jdk, or jdk+fx) - defaults to jdk
+        architecture: x64 # (x64 or x86) - defaults to x64
+    - name: install jmeter
+      timeout-minutes: 10
+      env:
+          JMETER_VERSION: 5.3
+      run: |
+        wget --no-check-certificate -O /tmp/apache-jmeter.tgz https://downloads.apache.org//jmeter/binaries/apache-jmeter-$JMETER_VERSION.tgz
+        cd /tmp && tar -xvf apache-jmeter.tgz
+        echo "jmeter.save.saveservice.output_format=xml" >> /tmp/apache-jmeter-$JMETER_VERSION/user.properties
+        echo "jmeter.save.saveservice.response_data.on_error=true" >> /tmp/apache-jmeter-$JMETER_VERSION/user.properties
+        wget -O /tmp/apache-jmeter-$JMETER_VERSION/lib/ext/mqtt-xmeter-1.13-jar-with-dependencies.jar https://github.com/emqx/mqtt-jmeter/raw/master/Download/v1.13.0/mqtt-xmeter-1.13-jar-with-dependencies.jar
+        ln -s /tmp/apache-jmeter-$JMETER_VERSION /opt/jmeter
+    - name: run fvt tests
+      timeout-minutes: 8
+      run: |
+        go build -o fvt/mserver/rest_server fvt/mserver/rest_server.go
+        go build -o fvt/wormhole_agent main.go
+        nohup fvt/mserver/rest_server rest_server 2>&1 &
+        nohup fvt/wormhole_agent > agent_server.out 2>&1 &
+        ./fvt/run_jmeter.sh
+    - name: check logs
+      run: |
+        set -e -u -x
+        sudo apt update && sudo apt install -y libxml2-utils
+        cd jmeter_logs
+        if [ ! -z "$(cat *.jtl| grep '<failure>' | awk -F '>' '{print $2}' | awk -F '<' '{print $1}' | grep true)" ] ||
+           [ "$(xmllint --format --xpath '/testResults/sample/@rc' $(ls *.jtl) | sed -r 's/ /\n/g;' | sort -u | grep -E 'rc=\"[45][0-9][0-9]\"|rc=\"\"')" != "" ]; then
+            echo -e "---------------------------------------------\n"
+            echo "FVT tests error"
+            exit 1
+        fi
+    - uses: actions/upload-artifact@v1
+      if: failure()
+      with:
+        name: jmeter_logs
+        path: ./jmeter_logs
+
+
