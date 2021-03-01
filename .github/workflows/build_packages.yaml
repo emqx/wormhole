@@ -1,0 +1,40 @@
+name: Build packages
+
+on:
+  push:
+    tags:
+  pull_request:
+  release:
+    types:
+      - published
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os:
+        - linux
+        - darwin
+        arch:
+        - amd64
+        - arm64
+        exclude:
+        - os: darwin
+          arch: arm64
+
+    runs-on: ubuntu-20.04
+
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-go@v2
+      with:
+        go-version: '1.15.1' # The Go version to download (if necessary) and use.
+    - name: build
+      env:
+        GOOS: ${{ matrix.os }}
+        GOARCH: ${{ matrix.arch }}
+      run: make pkg
+    - uses: actions/upload-artifact@v2
+      with:
+        name: wormhole
+        path: _packages
