@@ -3,6 +3,8 @@ basic:
   server: 127.0.0.1
   # The wormhole server port
   port: 4242
+  #The agent id for registering the agent.
+  #agentId: xxx-yyy-zzz
 
 log:
   # Set log level, default to false
@@ -10,7 +12,7 @@ log:
   # Print to console or not
   consoleLog: false
   # The log path
-  logPath: log
+  logPath: log/agent.log
 
 miscs:
   # The http timeout setting

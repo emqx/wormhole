@@ -30,14 +30,19 @@ func NewClient() {
 		return
 	}
 
-	args := os.Args[2:]
-	if len(args) == 0 {
-		fmt.Printf("The node identifier is expected.")
-		os.Exit(0)
+	id := conf.Basic.AgentId
+	if id == "" {
+		fmt.Println("The node identifier is not found in client.yaml.")
+
+		args := os.Args[2:]
+		if len(args) == 0 {
+			fmt.Printf("The node identifier is neither found in either yaml nor in command line interface.")
+			os.Exit(0)
+		}
 	}
 
-	common.Log.Printf("The node identifier is %s\n", args[0])
-	qcc := QCClient{Server: fmt.Sprintf("%s:%d", conf.Basic.Server, conf.Basic.Port), Identifier: args[0]}
+	common.Log.Printf("The node identifier is %s\n", id)
+	qcc := QCClient{Server: fmt.Sprintf("%s:%d", conf.Basic.Server, conf.Basic.Port), Identifier: id}
 
 	err := qcc.clientMain()
 	if err != nil {

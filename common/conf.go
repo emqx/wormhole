@@ -33,8 +33,9 @@ type (
 
 	AgentConfig struct {
 		Basic struct {
-			Server string `yaml:"server"`
-			Port   int    `yaml:"port"`
+			Server  string `yaml:"server"`
+			Port    int    `yaml:"port"`
+			AgentId string `yaml:"agentId"`
 		}
 		Log   LogConfig
 		Miscs struct {
