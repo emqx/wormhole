@@ -8,6 +8,7 @@ PACKAGE_NAME := wormhole-$(VERSION)-$(shell go env GOOS)-$(shell go env GOARCH)
 build:
 	@CGO_ENABLED=0 go build -o agent main.go
 	@mkdir -p $(BUILD_PATH)/$(PACKAGE_NAME)/etc
+	@mkdir -p $(BUILD_PATH)/$(PACKAGE_NAME)/log
 	@mv agent $(BUILD_PATH)/$(PACKAGE_NAME)
 	@cp etc/client.yaml $(BUILD_PATH)/$(PACKAGE_NAME)/etc
 	@echo "Build successfully"
