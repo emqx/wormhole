@@ -38,6 +38,8 @@ func NewClient() {
 		if len(args) == 0 {
 			fmt.Printf("The node identifier is neither found in either yaml nor in command line interface.")
 			os.Exit(0)
+		} else {
+			id = args[0]
 		}
 	}
 
