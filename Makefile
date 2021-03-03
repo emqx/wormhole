@@ -10,7 +10,7 @@ build:
 	@mkdir -p $(BUILD_PATH)/$(PACKAGE_NAME)/etc
 	@mkdir -p $(BUILD_PATH)/$(PACKAGE_NAME)/log
 	@mv agent $(BUILD_PATH)/$(PACKAGE_NAME)
-	@cp etc/client.yaml $(BUILD_PATH)/$(PACKAGE_NAME)/etc
+	@cp etc/client.yaml $(BUILD_PATH)/$(PACKAGE_NAME)/etc/
 	@echo "Build successfully"
 
 .PHONY: pkg
@@ -20,3 +20,9 @@ pkg: build
 	@cd $(BUILD_PATH) && tar -czf $(PACKAGE_NAME).tar.gz $(PACKAGE_NAME)
 	@mv $(BUILD_PATH)/$(PACKAGE_NAME).zip $(BUILD_PATH)/$(PACKAGE_NAME).tar.gz $(PACKAGES_PATH)
 	@echo "Package build successfully"
+
+TARGET ?= emqx/agent
+
+.PHONY: docker
+docker:
+	docker build -t $(TARGET):$(VERSION) .
