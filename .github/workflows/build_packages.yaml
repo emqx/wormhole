@@ -44,3 +44,16 @@ jobs:
         repo: wormhole
         path: "_packages/wormhole-*"
         token: ${{ github.token }}
+
+  build_docker:
+    runs-on: ubuntu-20.04
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: build docker
+      run: make docker
+    - name: push docker
+      if: github.event_name == 'release'
+      run: |
+        echo ${{ secrets.DOCKER_HUB_TOKEN }} | docker login -u ${{ secrets.DOCKER_HUB_USER }} --password-stdin
+        docker push emqx/agent:$(git describe --tags --always)
