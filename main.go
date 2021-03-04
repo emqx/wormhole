@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	if args := os.Args[1:]; len(args) == 1 {
+	if args := os.Args[1:]; len(args) == 1 || len(args) == 2 {
 		if mode := strings.ToLower(args[0]); mode == "client" {
 			client.NewClient()
 		} else {
