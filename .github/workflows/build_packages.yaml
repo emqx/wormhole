@@ -33,7 +33,9 @@ jobs:
       env:
         GOOS: ${{ matrix.os }}
         GOARCH: ${{ matrix.arch }}
-      run: make pkg
+      run: |
+        make pkg
+        cd _packages && for var in $(ls); do sudo bash -c "echo $(sha256sum $var | awk '{print $1}') > $var.sha256"; done && cd -
     - uses: actions/upload-artifact@v2
       with:
         name: wormhole
